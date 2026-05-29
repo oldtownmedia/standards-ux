@@ -708,6 +708,14 @@ APP_VERSION=1.0.0
 PORT=3000
 ```
 
+Authenticated tools also need the Google OAuth vars (see §8.6):
+```
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
+OAUTH_REDIRECT_URI=https://otm-[tool-name].up.railway.app/auth/callback
+ALLOWED_HD=meetotm.com
+```
+
 ### 8.3 Health Check Endpoint
 
 Every app should expose `GET /health` returning:
@@ -810,6 +818,63 @@ Card:              white, 400px max-width, 8px radius, --shadow-xl
 Input:             Standard input style (single password field)
 Button:            Gold accent (#d4a029) for "Access"
 ```
+
+### 8.6 Google OAuth Implementation Checklist
+
+Stack-agnostic steps to wire up the §8.5 standard. The specific library differs by
+stack (Passport/NextAuth/Authlib/Google Identity Services, etc.), but every OTM
+tool covers these same points.
+
+**1. Google Cloud Console**
+- Create (or reuse) a project and configure the **OAuth consent screen** as
+  **Internal** (Workspace-only — this alone limits sign-in to your org).
+- Create an **OAuth 2.0 Client ID** of type **Web application**.
+- Add **Authorized redirect URIs** for every environment:
+  - `http://localhost:3000/auth/callback` (local dev)
+  - `https://otm-<tool-name>.up.railway.app/auth/callback` (Railway)
+  - any custom domain you map.
+- Store the client ID/secret as Railway env vars; never commit them:
+  ```
+  GOOGLE_CLIENT_ID=...
+  GOOGLE_CLIENT_SECRET=...
+  OAUTH_REDIRECT_URI=https://otm-<tool-name>.up.railway.app/auth/callback
+  ALLOWED_HD=meetotm.com
+  ```
+
+**2. Authorization request**
+- Scopes: `openid email profile` (that's all you need for identity).
+- Add the hosted-domain hint so Google pre-filters the account chooser:
+  ```
+  https://accounts.google.com/o/oauth2/v2/auth
+    ?client_id=$GOOGLE_CLIENT_ID
+    &redirect_uri=$OAUTH_REDIRECT_URI
+    &response_type=code
+    &scope=openid%20email%20profile
+    &hd=meetotm.com
+    &access_type=offline
+    &state=<csrf-token>
+  ```
+- `hd` is a UX hint only; it is **not** a security control (see step 4).
+
+**3. Token exchange + identity**
+- Exchange the `code` for tokens server-side, then read the verified ID-token
+  claims: `email`, `name`, `picture`, `hd`, `sub` (`sub` is the stable user key).
+- Feed `name` / `email` / `picture` straight into the sidebar user block (§5.5).
+
+**4. Enforce the domain server-side (do not trust the client)**
+- Verify the ID token's signature, `aud` (your client ID), and `iss`
+  (`accounts.google.com`).
+- Reject sign-in unless `hd === "meetotm.com"` **and** `email_verified === true`
+  **and** the email ends in `@meetotm.com`. Show: "Use your @meetotm.com account
+  to sign in."
+
+**5. Session + sign out**
+- Establish a session (signed cookie / server session) after verification.
+- **Sign out** clears that session and returns to the gate; optionally hit
+  Google's revocation endpoint. There is no local password to reset.
+
+**6. CSRF**
+- Use the `state` parameter to protect the callback.
 
 ---
 

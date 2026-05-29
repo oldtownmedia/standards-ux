@@ -30,6 +30,7 @@ When tools get rebuilt, these are what drift or go missing. They are now fully s
 2. **Collapsible nav groups** (`<button aria-expanded>` toggle + nested items).
 3. **Logo + product subtitle** at the top of the sidebar (`.OTM` over the instance name).
 4. **Buttons are blue/gold only** — there is no teal button.
+5. **Auth is Google OAuth (@meetotm.com), never email/password or local accounts** — the signed-in user's name, email, and avatar come from the provider and show in the sidebar block. See §8.5.
 
 ## Using with Cursor / Claude
 

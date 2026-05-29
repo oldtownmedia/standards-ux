@@ -381,7 +381,7 @@ Collapsed:     sub-nav hidden when the toggle is aria-expanded="false"
 
 **User / account block (pinned to the sidebar bottom):**
 
-This block is part of the standard shell and is the single most commonly missed element when tools are rebuilt. Always include it on authenticated tools.
+This block is part of the standard shell and is the single most commonly missed element when tools are rebuilt. Always include it on authenticated tools. **Its contents come from the OAuth provider, not from local input** (see §8.5): the avatar is the Google profile photo, and the name and email are the signed-in identity.
 ```
 Border top:    1px #2d4a7c
 Avatar:        32px, border-radius full (Google/OAuth photo or initials fallback)
@@ -758,16 +758,57 @@ Border top:    1px solid #e2e8f0
 Format:        "OTM Internal Tools · {version}"   e.g. "OTM Internal Tools · 1.0.0"
 ```
 
-### 8.5 Login / Auth Gate Pattern
+### 8.5 Authentication and User Identity
 
-For password-protected tools, use a centered card on a navy background:
+> **Principle: OTM tools authenticate through OAuth, never local user management.**
+> Tools do not store passwords, do not run their own sign-up flow, and do not keep
+> a local users table for authentication. A user's identity (name, email, avatar)
+> always comes from the OAuth provider and is treated as the source of truth.
+> The standard provider is **Google Workspace**, and sign-in is **restricted to
+> `@meetotm.com` accounts**.
 
+This is a hard rule for every authenticated OTM tool. If you are an AI assistant
+generating a tool, implement Google OAuth (e.g. Google Identity Services / an
+OAuth library for the stack), hosted-domain restricted to `meetotm.com`, and read
+the user's profile from the provider. Never scaffold email/password auth or a
+local account system.
+
+**OAuth sign-in gate** (the screen shown when a user is not yet authenticated):
+```
+Page background:   #1a365d (navy)
+Card:              white, 400px max-width, 8px radius (--radius-lg), --shadow-xl
+Logo:              .OTM above the card (white) with the gold leading dot
+Heading:           "Sign in to {Tool Name}" (H2)
+Helper text:       "Use your @meetotm.com Google account." (Body Small, muted)
+Primary action:    a single "Continue with Google" provider button:
+                     - white background, 1px #e2e8f0 border, #334155 text
+                     - Google "G" logo at left, 40px height, full card width
+                     - never restyle the Google mark; follow Google's button rules
+No password fields. No "Create account" link. No email/password inputs.
+Domain note:       reject non-@meetotm.com accounts with a clear error
+                   ("Use your @meetotm.com account to sign in.")
+```
+
+**Surfacing the user (required on every authenticated screen).**
+The signed-in user must always be visible, sourced from the OAuth profile:
+- Render the **sidebar user/account block** (see §5.5) with the provider **photo**
+  (`picture` claim) as the avatar, the user's **name**, and **email**. Fall back
+  to initials only when no photo is available.
+- **Sign out** clears the session and returns to the OAuth gate (a provider
+  logout / token revoke), not a local logout.
+- Anywhere the UI attributes an action to "you" (audit trails, "created by",
+  greetings), use the OAuth identity rather than a manually entered name.
+
+**Legacy: shared-password gate (avoid for new tools).**
+Only for a simple internal utility that has no per-user identity needs, a single
+shared-password gate is acceptable as a stopgap. It provides access control, not
+identity, so tools using it have no user block. Migrate to Google OAuth when the
+tool needs to know *who* is using it.
 ```
 Page background:   #1a365d
 Card:              white, 400px max-width, 8px radius, --shadow-xl
-Logo:              .OTM in white above the card (or navy inside card)
-Input:             Standard input style
-Button:            Gold accent (#d4a029) for "Access" / "Sign In"
+Input:             Standard input style (single password field)
+Button:            Gold accent (#d4a029) for "Access"
 ```
 
 ---
@@ -821,6 +862,10 @@ guidelines in OTM-BRAND-GUIDELINES.md. Key rules:
   Collapsible nav groups use a <button aria-expanded> toggle with nested items.
 - Primary buttons are blue; the single highest-emphasis CTA may be gold.
   There is NO teal button (teal is for success/growth/headings only).
+- Authenticate with Google OAuth restricted to @meetotm.com (see §8.5). Never
+  scaffold email/password auth or a local users table. Pull the user's name,
+  email, and avatar from the OAuth profile and show them in the sidebar user
+  block; Sign out performs a provider logout.
 - Clean, data-forward design with generous whitespace
 - Cards with subtle borders and shadows, optional colored left borders
 - Keyboard-focusable controls with visible focus rings; aria-current on the
@@ -913,6 +958,7 @@ guidelines in OTM-BRAND-GUIDELINES.md. Key rules:
 - Maintain at least 4.5:1 contrast ratio for text
 - Include the `.OTM` mark on every tool's navigation
 - Keep layouts clean and information-dense
+- Authenticate with Google OAuth and surface the signed-in user (photo, name, email) from the provider
 
 ### Don't
 
@@ -926,6 +972,8 @@ guidelines in OTM-BRAND-GUIDELINES.md. Key rules:
 - Use more than 3 colors from the chart palette in a single visualization unless absolutely necessary
 - Use teal (or any non-blue/gold color) as a button fill
 - Ship an authenticated tool without the sidebar user/account + Sign out block
+- Build email/password auth, a sign-up flow, or a local users table — use Google
+  OAuth (`@meetotm.com`) and read identity from the provider (see §8.5)
 
 ### Common deviations to watch for
 

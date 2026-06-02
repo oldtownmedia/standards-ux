@@ -355,6 +355,22 @@ Subtitle:      product / instance name below the logo, 12px, #94a3b8
 Border bottom: 1px #2d4a7c
 ```
 
+**Where the subtitle text comes from.** The `.OTM` mark is fixed brand and never
+changes. The subtitle is the application's *own* name and must be sourced from
+the application, not invented or overridden by the shell. In order of preference:
+
+1. A name the application already exposes — an app config value, an
+   `APP_NAME` / `PRODUCT_NAME` env var, `package.json` `name`/`displayName`, or
+   the equivalent the host app already defines. Read it; do not duplicate it.
+2. If no such value exists, **ask for the platform name** before building and
+   wire it to that config value — do not guess.
+
+Never hardcode a placeholder (`"Venn Intelligence"` is only an example in this
+guide), and never auto-derive the subtitle by abbreviating, truncating, or
+slugging some other string (e.g. emitting `"VEN"`). Treat the subtitle like the
+user/account block below: it reflects real, externally-supplied data, not a
+value the template fills in for you.
+
 **Section label (non-interactive group heading):**
 ```
 11px, uppercase, #94a3b8, weight 600, letter-spacing 0.06em
@@ -925,6 +941,9 @@ guidelines in OTM-BRAND-GUIDELINES.md. Key rules:
 - The sidebar MUST include: .OTM logo + product subtitle at top, and a pinned
   user/account block at the bottom (avatar, name, email, Sign out button).
   Collapsible nav groups use a <button aria-expanded> toggle with nested items.
+- The product subtitle under .OTM is the application's OWN name. Source it from
+  the app (config / APP_NAME env / package.json), or ASK for it. Never hardcode
+  a placeholder or abbreviate another string into it (do not emit "VEN").
 - Primary buttons are blue; the single highest-emphasis CTA may be gold.
   There is NO teal button (teal is for success/growth/headings only).
 - Authenticate with Google OAuth restricted to @meetotm.com (see §8.5). Never
@@ -1037,6 +1056,8 @@ guidelines in OTM-BRAND-GUIDELINES.md. Key rules:
 - Use more than 3 colors from the chart palette in a single visualization unless absolutely necessary
 - Use teal (or any non-blue/gold color) as a button fill
 - Ship an authenticated tool without the sidebar user/account + Sign out block
+- Hardcode, override, or auto-abbreviate the sidebar product subtitle — pull the
+  app's real name from its config or ask for it (see §5.5)
 - Build email/password auth, a sign-up flow, or a local users table — use Google
   OAuth (`@meetotm.com`) and read identity from the provider (see §8.5)
 
@@ -1046,7 +1067,7 @@ These are the elements most often missed or done off-brand when tools are rebuil
 
 1. **Sidebar user/account block + Sign out** is present and styled per §5.5 (avatar, name, email, focusable Sign out).
 2. **Collapsible nav groups** use a real `<button aria-expanded>` toggle, with a chevron that rotates and nested sub-items that hide when collapsed.
-3. **Logo + product subtitle** at the top of the sidebar (`.OTM` over the instance name, with the leading dot in gold).
+3. **Logo + product subtitle** at the top of the sidebar (`.OTM` over the instance name, with the leading dot in gold). The subtitle is the app's real name, pulled from its config or asked for — never a hardcoded placeholder or an abbreviation like "VEN" (see §5.5).
 4. **Button colors** are blue/gold only. No teal buttons.
 5. **Footer string** reads "OTM Internal Tools · {version}".
 

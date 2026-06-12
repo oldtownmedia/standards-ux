@@ -1,0 +1,243 @@
+/**
+ * OTM WordPress Plugin - Admin Styles
+ * A light, near-native accent layer for OTM plugin screens inside wp-admin.
+ *
+ * RULES OF THE ROAD
+ * - Everything here is scoped under `.otm-wp`. Put that class on your plugin's
+ *   page container (inside the standard `.wrap`). Nothing in this file styles a
+ *   bare element selector, so it can NEVER restyle the wider dashboard.
+ * - This is an accent layer, not a framework. Prefer WordPress-native markup and
+ *   classes (.button, .button-primary, .notice, .form-table, .nav-tab) and let
+ *   these styles add OTM polish on top. Do not rebuild wp-admin chrome.
+ * - Accent hex values are the OTM brand constants and match
+ *   platform/otm-tokens.css exactly. Do not invent new brand colors here.
+ *
+ * Enqueue (only on your screen):
+ *   add_action('admin_enqueue_scripts', function ($hook) {
+ *     if ($hook !== $my_page_hook) return;            // never load globally
+ *     wp_enqueue_style('otm-wp-admin', plugins_url('otm-wp-admin.css', __FILE__), [], '1.0.0');
+ *   });
+ *
+ * Markup:
+ *   <div class="wrap"><div class="otm-wp"> ...your screen... </div></div>
+ */
+
+.otm-wp {
+  /* --- OTM brand accents (constants — match platform/otm-tokens.css) --- */
+  --otm-navy: #1a365d;
+  --otm-blue: #1e4d8c;
+  --otm-blue-light: #2d6ab1;
+  --otm-gold: #d4a029;
+  --otm-gold-hover: #b8891f;
+  --otm-teal: #1a8a7d;
+
+  /* --- Light surfaces + WP-native neutrals (so we blend with wp-admin) --- */
+  --otm-text: #1d2327;        /* WP admin body text */
+  --otm-text-muted: #50575e;  /* WP admin secondary text */
+  --otm-border: #dcdcde;      /* WP admin hairline */
+  --otm-border-strong: #c3c4c7;
+  --otm-surface: #ffffff;
+  --otm-surface-subtle: #f6f7f7;
+
+  /* --- Semantic (kept light) --- */
+  --otm-success: #16a34a;
+  --otm-success-bg: #f0fdf4;
+  --otm-warning-text: #a16207;
+  --otm-warning-bg: #fefce8;
+  --otm-error: #dc2626;
+  --otm-error-bg: #fef2f2;
+  --otm-info: var(--otm-blue);
+  --otm-info-bg: #eff6ff;
+
+  --otm-radius: 6px;
+  --otm-radius-sm: 4px;
+  --otm-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+
+  color: var(--otm-text);
+  /* Inherit wp-admin's native UI font; we are a guest here, not Inter. */
+}
+
+/* ============================================================
+   HEADER (screen title + optional actions)
+   ============================================================ */
+.otm-wp .otm-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 12px;
+  margin: 4px 0 20px;
+  border-bottom: 1px solid var(--otm-border);
+}
+.otm-wp .otm-header h1,
+.otm-wp .otm-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--otm-navy);
+  margin: 0;
+  padding: 0;
+  letter-spacing: -0.01em;
+}
+.otm-wp .otm-header .otm-subtitle {
+  font-size: 13px;
+  color: var(--otm-text-muted);
+  margin-top: 2px;
+}
+/* Leading gold dot to echo the OTM ".OTM" mark, used sparingly. */
+.otm-wp .otm-title .dot { color: var(--otm-gold); }
+
+/* ============================================================
+   SECTION LABEL
+   ============================================================ */
+.otm-wp .otm-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--otm-text-muted);
+  margin: 0 0 8px;
+}
+
+/* ============================================================
+   CARD (a lighter cousin of the WP .postbox)
+   ============================================================ */
+.otm-wp .otm-card {
+  background: var(--otm-surface);
+  border: 1px solid var(--otm-border);
+  border-radius: var(--otm-radius);
+  box-shadow: var(--otm-shadow);
+  padding: 20px;
+  margin: 0 0 16px;
+}
+.otm-wp .otm-card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--otm-text);
+  margin: 0 0 12px;
+}
+/* Optional colored left border for emphasis (navy/gold/teal only). */
+.otm-wp .otm-card--accent { border-left: 3px solid var(--otm-navy); }
+.otm-wp .otm-card--gold   { border-left: 3px solid var(--otm-gold); }
+.otm-wp .otm-card--teal   { border-left: 3px solid var(--otm-teal); }
+
+/* ============================================================
+   BUTTONS
+   Layer OTM accents over WordPress's .button. Primary is blue; the
+   single highest-emphasis CTA may be gold. There is NO teal button.
+   ============================================================ */
+.otm-wp .button.otm-btn-primary,
+.otm-wp .otm-btn-primary {
+  background: var(--otm-blue);
+  border-color: var(--otm-blue);
+  color: #fff;
+  text-shadow: none;
+  box-shadow: none;
+  border-radius: var(--otm-radius-sm);
+}
+.otm-wp .button.otm-btn-primary:hover,
+.otm-wp .otm-btn-primary:hover {
+  background: var(--otm-navy);
+  border-color: var(--otm-navy);
+  color: #fff;
+}
+/* Gold CTA: reserve for the one highest-emphasis action on the screen. */
+.otm-wp .button.otm-btn-cta,
+.otm-wp .otm-btn-cta {
+  background: var(--otm-gold);
+  border-color: var(--otm-gold);
+  color: #1d2327;
+  text-shadow: none;
+  box-shadow: none;
+  border-radius: var(--otm-radius-sm);
+  font-weight: 600;
+}
+.otm-wp .button.otm-btn-cta:hover,
+.otm-wp .otm-btn-cta:hover {
+  background: var(--otm-gold-hover);
+  border-color: var(--otm-gold-hover);
+  color: #1d2327;
+}
+
+/* ============================================================
+   BADGES / STATUS PILLS
+   ============================================================ */
+.otm-wp .otm-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  padding: 4px 8px;
+  border-radius: var(--otm-radius-sm);
+  border: 1px solid transparent;
+}
+.otm-wp .otm-badge--neutral { background: var(--otm-surface-subtle); color: var(--otm-text-muted); border-color: var(--otm-border); }
+.otm-wp .otm-badge--success { background: var(--otm-success-bg); color: var(--otm-success); border-color: #bbf7d0; }
+.otm-wp .otm-badge--warning { background: var(--otm-warning-bg); color: var(--otm-warning-text); border-color: #fde68a; }
+.otm-wp .otm-badge--error   { background: var(--otm-error-bg); color: var(--otm-error); border-color: #fecaca; }
+.otm-wp .otm-badge--info    { background: var(--otm-info-bg); color: var(--otm-info); border-color: #bfdbfe; }
+
+/* ============================================================
+   CALLOUT (use WP .notice for system messages; this is for inline tips)
+   ============================================================ */
+.otm-wp .otm-callout {
+  border: 1px solid var(--otm-border);
+  border-left: 3px solid var(--otm-blue);
+  background: var(--otm-surface-subtle);
+  border-radius: var(--otm-radius-sm);
+  padding: 12px 14px;
+  font-size: 13px;
+  color: var(--otm-text);
+}
+.otm-wp .otm-callout--gold { border-left-color: var(--otm-gold); }
+.otm-wp .otm-callout--teal { border-left-color: var(--otm-teal); }
+
+/* ============================================================
+   SIMPLE TABLE (lighter than .wp-list-table for plugin data views)
+   ============================================================ */
+.otm-wp .otm-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--otm-surface);
+  border: 1px solid var(--otm-border);
+  border-radius: var(--otm-radius);
+  overflow: hidden;
+  font-size: 13px;
+}
+.otm-wp .otm-table th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--otm-text-muted);
+  background: var(--otm-surface-subtle);
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--otm-border);
+}
+.otm-wp .otm-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--otm-border);
+}
+.otm-wp .otm-table tr:last-child td { border-bottom: 0; }
+
+/* ============================================================
+   LINKS + FOCUS
+   ============================================================ */
+.otm-wp a { color: var(--otm-blue); }
+.otm-wp a:hover { color: var(--otm-navy); }
+
+/* Visible focus ring for keyboard users (matches the platform default). */
+.otm-wp :where(a, button, .button, [role="button"], input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--otm-blue-light);
+  outline-offset: 2px;
+  border-radius: var(--otm-radius-sm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .otm-wp *, .otm-wp *::before, .otm-wp *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

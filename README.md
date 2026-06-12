@@ -1,41 +1,42 @@
-# OTM Platform UX Guidelines
+# OTM UX Guidelines
 
-The single source of truth for the look and feel of OTM (Old Town Media) internal tools, dashboards, and applications. Use this when building any internal tool in Cursor and deploying to Railway.
+The single source of truth for the look and feel of everything OTM (Old Town Media) builds. This repository holds a **collection** of guideline sets, one per surface we build for. Each set shares the same OTM brand foundation (palette, accents, type, accessibility bar) but adapts it to the constraints of its surface.
 
-## What's in here
+## Guideline sets
 
-| File | Purpose |
-|------|---------|
-| **`OTM-BRAND-GUIDELINES.md`** | The written spec: color, type, spacing, components, the app shell, accessibility, and Railway conventions. Start here. |
-| **`otm-tokens.css`** | Design tokens (CSS custom properties): colors, the type scale, spacing, radius, shadows, plus a base reset, type utilities, and accessibility defaults (`:focus-visible`, reduced-motion). |
-| **`otm-components.css`** | The canonical, reusable implementation of the app shell and components: sidebar (logo + subtitle, nav, **collapsible groups**, **user/account block + Sign out**), content header, buttons, cards, badges, integration chips, metric cards, footer. |
-| **`otm-brand-showcase.html`** | A living visual reference. Open it in any browser to see every token and component rendered. |
+| Set | Folder | Use it when you are building… |
+|-----|--------|-------------------------------|
+| **Platform / Internal Tools** | [`platform/`](platform/) | An OTM internal tool, dashboard, or application (full app shell: navy sidebar, OAuth, Railway deploy). |
+| **WordPress Plugins** | [`wordpress-plugins/`](wordpress-plugins/) | A WordPress plugin for management, maintenance, or small features (e.g. job boards). Lighter weight, lives inside wp-admin, OTM accents only. |
 
-## Quick start
+Start in the folder that matches what you are building. Each set has its own `README.md`, written guideline, design tokens / CSS, and a living HTML showcase.
 
-Add the two stylesheets to the root of your tool, tokens first:
+## What stays constant across every set
 
-```html
-<link rel="stylesheet" href="otm-tokens.css">
-<link rel="stylesheet" href="otm-components.css">
-```
+These are the OTM brand constants. Individual sets reuse the exact same values; they never redefine them.
 
-Then build with the documented classes (`.app-shell`, `.sidebar`, `.nav-item`, `.nav-group`, `.sidebar-user`, `.btn`, `.card`, `.badge`, etc.) instead of hardcoding colors or rebuilding the shell. See `OTM-BRAND-GUIDELINES.md` §5 (components) and §8.4 (page structure).
+- **Accent palette:** Navy `#1a365d`, Blue `#1e4d8c`, Gold `#d4a029`, Teal `#1a8a7d`.
+- **Button rule:** Primary actions are blue; the single highest-emphasis CTA may be gold. There is no teal button (teal is for success/growth/headings only).
+- **Type:** Clean sans (Inter on our own surfaces; the host's native UI font where we are a guest, e.g. wp-admin). No serif or decorative display fonts. Never use em dashes in UI copy.
+- **Accessibility:** 4.5:1 contrast for body text, visible keyboard focus rings, real semantic elements, `prefers-reduced-motion` respected.
+- **Don't override your host.** Pull names, identity, and chrome from the host environment instead of hardcoding or overriding them. (Platform: product name + user come from the app/OAuth, see `platform/` §5.5/§8.5. WordPress: never restyle wp-admin globally — scope everything to your plugin, see `wordpress-plugins/`.)
 
-## Most-missed elements (check these every time)
+The canonical hex values, type scale, spacing, and radius live in [`platform/otm-tokens.css`](platform/otm-tokens.css). Other sets cite those values as the source of truth for accents.
 
-When tools get rebuilt, these are what drift or go missing. They are now fully specified in §5.5 and shipped in `otm-components.css`:
+## What changes between sets
 
-1. **Sidebar user/account block + Sign out** at the bottom of the sidebar.
-2. **Collapsible nav groups** (`<button aria-expanded>` toggle + nested items).
-3. **Logo + product subtitle** at the top of the sidebar (`.OTM` over the instance name).
-4. **Buttons are blue/gold only** — there is no teal button.
-5. **Auth is Google OAuth (@meetotm.com), never email/password or local accounts** — the signed-in user's name, email, and avatar come from the provider and show in the sidebar block. See §8.5.
+Each surface has different constraints, so each set adapts:
 
-## Using with Cursor / Claude
+- **Platform** owns the whole screen → full OTM shell (navy sidebar, dark surfaces, heavier components).
+- **WordPress plugins** are a guest inside someone else's admin → light, near-native, OTM accents only, no shell.
 
-Paste the prompt prefix in `OTM-BRAND-GUIDELINES.md` §10 as context so the assistant follows the palette, type scale, shell structure, and accessibility rules.
+## Adding a new guideline set
+
+1. Create a new folder (e.g. `marketing-sites/`).
+2. Add: a `README.md`, the written guideline (`OTM-*-GUIDELINES.md`), the CSS/tokens for that surface, and an HTML showcase.
+3. Reuse the constants above — same accents, same button rule, same accessibility bar — and document only what the surface changes.
+4. Add a row to the table at the top of this file.
 
 ---
 
-Internal OTM repository. See `OTM-BRAND-GUIDELINES.md` for the full standard.
+Internal OTM repository. Open the folder for the surface you are building.

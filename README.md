@@ -40,7 +40,7 @@ Each surface has different constraints, so each set adapts:
 
 - **Platform** owns the whole screen → full OTM shell (navy sidebar, dark surfaces, heavier components).
 - **WordPress plugins** are a guest inside someone else's admin → light, near-native, OTM accents only, no shell.
-- **Claude skills** are non-visual → no palette or CSS at all; the standard is about structure, the trigger contract, naming, and distribution via Skill Sync.
+- **Claude skills** are non-visual → no palette or CSS at all; the standard is about structure, the trigger contract, naming, and distribution via SkillSync.
 
 ## Adding a new standards set
 

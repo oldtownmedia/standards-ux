@@ -18,7 +18,7 @@ Reach for a skill when the work is a **repeatable workflow with a known shape** 
 
 | Build a… | When the work is… | Lives in / shipped by | Example |
 |---|---|---|---|
-| **Skill** | A repeatable *workflow* or *ritual* — a sequence of steps, a document you produce, a check you run. Triggered in conversation. | A `claude-skill` repo, installed into `~/.claude/skills/` via Skill Sync. | "Recap this meeting", "run discovery on [client]", "build a UTM" |
+| **Skill** | A repeatable *workflow* or *ritual* — a sequence of steps, a document you produce, a check you run. Triggered in conversation. | A `claude-skill` repo, installed into `~/.claude/skills/` via SkillSync. | "Recap this meeting", "run discovery on [client]", "build a UTM" |
 | **Platform / internal tool** | A standing *application* with its own screens, login, and data that people return to. | A deployed app (see [`platform/`](../platform/)). | The CaaS dashboard, the proposal builder UI |
 | **WordPress plugin** | A feature that has to live *inside a client's WordPress site*. | A plugin (see [`wordpress-plugins/`](../wordpress-plugins/)). | A job board, a maintenance utility |
 | **Agent** | An *autonomous operator* that runs many tools over a long task with little supervision. | An agent definition (out of scope here). | A background research operator |
@@ -38,12 +38,12 @@ When in doubt, prefer the smallest thing that works. A skill is lighter than a p
 
 ## 2. Anatomy of a skill repo
 
-Every OTM skill is **its own GitHub repo**, named with the skill's slug, and tagged with the `claude-skill` topic so Skill Sync can find it (see §6–§7). The repo root must contain three files; everything else is optional supporting material.
+Every OTM skill is **its own GitHub repo**, named with the skill's slug, and tagged with the `claude-skill` topic so SkillSync can find it (see §6–§7). The repo root must contain three files; everything else is optional supporting material.
 
 ```
 skill-meeting-recap/                ← repo, named for the skill slug
 ├── SKILL.md                        ← REQUIRED. The instructions Claude reads.
-├── skill.json                      ← REQUIRED. Machine-readable metadata for Skill Sync.
+├── skill.json                      ← REQUIRED. Machine-readable metadata for SkillSync.
 ├── README.md                       ← REQUIRED. Human documentation (what it is, how to use).
 ├── references/                     ← optional. Background docs the skill reads when it runs.
 │   ├── format-rules.md
@@ -59,7 +59,7 @@ skill-meeting-recap/                ← repo, named for the skill slug
 | File | Audience | Purpose |
 |---|---|---|
 | `SKILL.md` | **Claude** | The frontmatter (how it gets invoked) + the body (what to do). The heart of the skill. |
-| `skill.json` | **Skill Sync** (the installer) | Name, version, scope, requirements, tags. How the skill is distributed and updated. |
+| `skill.json` | **SkillSync** (the installer) | Name, version, scope, requirements, tags. How the skill is distributed and updated. |
 | `README.md` | **Humans** | Plain-English "what this does, when to use it, what it needs connected." |
 
 ### `SKILL.md` frontmatter
@@ -82,7 +82,7 @@ description: >
 
 ### `skill.json`
 
-The metadata Skill Sync reads to install, version, and group the skill:
+The metadata SkillSync reads to install, version, and group the skill:
 
 ```json
 {
@@ -102,7 +102,7 @@ The metadata Skill Sync reads to install, version, and group the skill:
 - **`version`** — semver (`MAJOR.MINOR.PATCH`). Bumping this is how an update reaches everyone (§7).
 - **`scope`** — `org` (everyone on the team should have it) or `personal` (optional / purpose-built).
 - **`requires`** — what must be connected for the skill to work: `mcp` (connectors like HubSpot, ClickUp, Fathom) and `tools` (e.g. `code-execution`, web search). Leave empty if the skill is self-contained.
-- **`displayName`, `tags`, `updatedAt`** — used by the Skill Sync dashboard for browsing and search.
+- **`displayName`, `tags`, `updatedAt`** — used by the SkillSync dashboard for browsing and search.
 
 Your AI assistant can generate `skill.json` from the `SKILL.md` — but **you** own the `scope` and `requires` calls, because they decide who gets it and whether it works.
 
@@ -217,7 +217,7 @@ Rules of thumb:
 - OTM-process skills that shape a specific OTM methodology may carry the `otm-` or `skill-` convention used by the family (e.g. `otm-naming-system`, `skill-otm-sales-discovery`). Match the siblings already in the family rather than inventing a new prefix.
 - Avoid versions or dates in the name (`recap-v2` ❌ — versioning lives in `skill.json`).
 
-**The `claude-skill` topic — the distribution marker.** A skill repo only becomes installable once it is tagged with the GitHub topic **`claude-skill`**. Skill Sync discovers skills by scanning the source org for that topic. No topic → invisible to the installer. Your assistant can set it: `gh repo edit <org>/<slug> --add-topic claude-skill`.
+**The `claude-skill` topic — the distribution marker.** A skill repo only becomes installable once it is tagged with the GitHub topic **`claude-skill`**. SkillSync discovers skills by scanning the source org for that topic. No topic → invisible to the installer. Your assistant can set it: `gh repo edit <org>/<slug> --add-topic claude-skill`.
 
 **Scope.** Set `skill.json` `scope` deliberately: `org` for things everyone should have, `personal` for narrow or experimental skills. Scope drives how the dashboard groups it and whether it's part of "pull everything."
 
@@ -225,20 +225,57 @@ Rules of thumb:
 
 ---
 
-## 7. Versioning and distribution via Skill Sync
+## 7. Versioning and distribution via SkillSync
 
-Skills are distributed by **Skill Sync** — the `otm-skills` CLI and local dashboard (the `platform-skills-manager` tool). It pulls `claude-skill` repos from the source org and installs them into `~/.claude/skills/`.
+Skills are distributed by **SkillSync** — OTM's Mac app for browsing, installing, and updating skills (the same engine is also available as the `otm-skills` CLI). SkillSync scans the GitHub orgs you select for repos tagged `claude-skill`, shows you what's available versus installed, and writes skills into your local `~/.claude/skills/` folder. No manual file moving, no git commands — a teammate clicks **Install** and the skill appears in Claude.
+
+### The SkillSync app
+
+SkillSync is the cloud-to-desktop bridge: skills live in GitHub (the cloud source of truth), and the app pulls the current version down to each person's Mac and keeps it in sync.
+
+**The dashboard** — browse and manage skills. Each skill card shows its name, description, tags, when it was last updated, and a **status** with the right action:
+
+![SkillSync dashboard — available and installed skills with per-skill status](assets/skillsync-dashboard.png)
+
+| Status badge | Meaning | Action offered |
+|---|---|---|
+| **Up to date** | Installed, matches the latest version in the repo. | **Delete** (remove it locally) |
+| *(behind)* | Installed, but the repo has a newer version. | **Update** to pull the new version |
+| **Missing skill.json** | The repo is tagged `claude-skill` but has no valid `skill.json`, so it can't be versioned or managed. | **Install** still offered, but fix the metadata (§2) so it tracks properly |
+| *(not installed)* | Available in a source but not on this Mac. | **Install** |
+
+The header shows totals ("22 skills available · 5 installed"), and you can filter by text, **source org**, **category**, and **status**. **View Repo** jumps to the skill's GitHub repo. This is why the rules in §2 and §6 matter in practice: a skill with a mismatched slug or missing `skill.json` shows up here as broken ("Missing skill.json") instead of cleanly installable.
+
+**Settings — sources and folder.** Each person points SkillSync at the GitHub account and orgs to search, and at the local skills folder:
+
+![SkillSync settings — GitHub account and skill sources](assets/skillsync-settings-sources.png)
+
+- **GitHub Account** — sign in once (the app authenticates to read your `claude-skill` repos).
+- **Skill Sources** — check the orgs to scan (e.g. `oldtownmedia`, `otm-skill-sync`). Only repos tagged `claude-skill` in those sources appear. This is the org-level analog of the distribution marker from §6.
+- **Skills Folder** — where skills install, normally `~/.claude/skills`. The footer shows the app version (e.g. `SkillSync v0.2.0 — OTM`).
+
+![SkillSync settings — skills folder set to ~/.claude/skills](assets/skillsync-settings-folder.png)
+
+**The CLI is the same tool.** Everything above is also scriptable for people who prefer the terminal:
+
+```bash
+otm-skills status            # what's available vs installed
+otm-skills pull              # update everything that's behind
+otm-skills pull <slug>       # install/update one skill
+otm-skills list              # list installed skills
+otm-skills rollback <slug>   # restore the most recent backup
+```
 
 ### How a skill reaches people
 
 ```
-Author edits SKILL.md / bumps skill.json version → push to the skill's repo
+Author edits SKILL.md / bumps skill.json version → push to the skill's claude-skill repo (the cloud source)
         │
         ▼
-Skill Sync (otm-skills) sees the new version on the claude-skill repo
+SkillSync (app or otm-skills CLI) sees the new version on the repo
         │
         ▼
-Teammate runs `otm-skills pull`  →  validated  →  backed up  →  written to ~/.claude/skills/<slug>/
+Teammate clicks Update / runs `otm-skills pull`  →  validated  →  backed up  →  written to ~/.claude/skills/<slug>/
 ```
 
 ### The version bump is the release
@@ -268,13 +305,13 @@ Keep a short `CHANGELOG.md` in the skill repo, newest first, so teammates know w
 - Initial release
 ```
 
-### What Skill Sync does for safety (so you don't have to worry)
+### What SkillSync does for safety (so you don't have to worry)
 
 - **Validates** every skill before writing (SKILL.md present, valid `skill.json`, name regex, valid semver, no path traversal).
 - **Backs up** the existing folder before overwriting (keeps the last 5) and supports `otm-skills rollback <slug>`.
 - **Warns on collisions** if a folder exists that it didn't install.
 
-You don't run any of this by hand — but knowing it exists is why the rules above (matching names, valid semver, the topic) matter: break one and Skill Sync refuses or skips the skill.
+You don't run any of this by hand — but knowing it exists is why the rules above (matching names, valid semver, the topic) matter: break one and SkillSync refuses or skips the skill.
 
 ---
 
@@ -289,7 +326,7 @@ Never tag `claude-skill` on something you haven't watched run. Test locally firs
 5. **No-connector run** (if it uses MCPs). Disconnect a required tool and confirm it degrades gracefully (flags the gap, offers a fallback) rather than hallucinating data.
 6. **Boundary check.** Confirm it hands off / declines work that belongs to another skill, per its own description.
 
-Only when all six behave do you set `scope`, tag `claude-skill`, and let Skill Sync distribute it.
+Only when all six behave do you set `scope`, tag `claude-skill`, and let SkillSync distribute it.
 
 ---
 

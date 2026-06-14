@@ -23,5 +23,5 @@ It does not shorten links, maintain a UTM spreadsheet, or pull analytics. For fu
 | File | Role |
 |------|------|
 | `SKILL.md` | Instructions Claude reads — note the description's trigger phrases + boundary line, and the "ask, don't fabricate" rule in Required inputs. |
-| `skill.json` | Metadata for Skill Sync — slug matches `SKILL.md`, semver version, `scope: org`. |
+| `skill.json` | Metadata for SkillSync — slug matches `SKILL.md`, semver version, `scope: org`. |
 | `references/utm-conventions.md` | The canonical vocabulary the skill reads at run time, kept out of `SKILL.md` to stay lean. |

@@ -1,0 +1,11 @@
+{
+  "name": "utm-namer",
+  "displayName": "UTM Namer",
+  "version": "1.0.0",
+  "description": "Turn a plain-English campaign description into a consistent, correctly tagged UTM tracking URL using OTM's naming conventions.",
+  "author": "OTM",
+  "scope": "org",
+  "requires": { "mcp": [], "tools": [] },
+  "tags": ["marketing", "utm", "tracking", "campaigns"],
+  "updatedAt": "2026-06-14"
+}

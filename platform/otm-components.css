@@ -233,6 +233,129 @@
 .sidebar-signout:hover { background: var(--color-surface-mid); color: var(--color-white); }
 
 /* ============================================================
+   PLATFORM SWITCHER (cross-app product switcher, §5.10)
+   Lives on the sidebar logo block; opens a popover listing the
+   other OTM platforms. Targets come from the shared OTM_PLATFORMS
+   registry; the active product matches the app's own PLATFORM_ID.
+   ============================================================ */
+
+.platform-switcher {
+  position: relative;
+  flex-shrink: 0;
+}
+
+/* The logo block becomes a focusable trigger button.
+   Apply BOTH .sidebar-logo and .platform-switcher-trigger to it so the
+   logo box (height, padding, border-bottom) carries over. */
+.platform-switcher-trigger {
+  width: 100%;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition: background var(--transition-base);
+}
+.platform-switcher-trigger:hover {
+  background: var(--color-surface-mid);
+}
+.platform-switcher-trigger .sidebar-logo-sub {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+.platform-switcher-chevron {
+  width: 12px;
+  height: 12px;
+  transition: transform var(--transition-base);
+}
+.platform-switcher-trigger[aria-expanded="true"] .platform-switcher-chevron {
+  transform: rotate(180deg);
+}
+
+/* Popover menu: a white card floating over content */
+.platform-switcher-menu {
+  position: absolute;
+  top: calc(100% - var(--space-1));
+  left: var(--space-3);
+  right: var(--space-3);
+  z-index: 60;
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-2);
+}
+.platform-switcher-menu[hidden] { display: none; }
+
+.platform-switcher-label {
+  font-size: var(--text-overline-size);
+  font-weight: var(--text-overline-weight);
+  letter-spacing: var(--text-overline-tracking);
+  text-transform: uppercase;
+  color: var(--color-gray-500);
+  padding: var(--space-2) var(--space-3) var(--space-1);
+}
+
+/* One row per platform */
+.platform-option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  border-left: 3px solid transparent;
+  text-decoration: none;
+  transition: background var(--transition-base);
+}
+.platform-option:hover { background: var(--color-gray-100); }
+.platform-option.is-current,
+.platform-option[aria-current="page"] {
+  background: var(--color-gray-50);
+  border-left-color: var(--color-gold);
+}
+
+.platform-monogram {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-navy);
+  color: var(--color-white);
+  font-size: var(--text-body-sm-size);
+  font-weight: 600;
+}
+
+.platform-option-text {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.platform-option-name {
+  font-size: var(--text-body-size);
+  font-weight: 600;
+  color: var(--color-gray-900);
+  line-height: 1.3;
+}
+.platform-option-desc {
+  font-size: var(--text-body-sm-size);
+  color: var(--color-gray-500);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.platform-option-check {
+  width: 16px;
+  height: 16px;
+  margin-left: auto;
+  flex-shrink: 0;
+  color: var(--color-gold);
+}
+
+/* ============================================================
    CONTENT HEADER BAR
    ============================================================ */
 

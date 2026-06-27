@@ -154,6 +154,108 @@
       color: var(--color-white);
     }
 
+    /* --- Platform switcher (cross-app product switcher, §5.10) --- */
+    .platform-switcher { position: relative; }
+    .platform-switcher-trigger {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      padding: 0 var(--space-6);
+      height: 64px;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--color-border-dark);
+      cursor: pointer;
+      font-family: inherit;
+      text-align: left;
+      transition: background var(--transition-base);
+    }
+    .platform-switcher-trigger:hover { background: var(--color-surface-mid); }
+    .platform-switcher-trigger .sidebar-logo-sub {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-1);
+    }
+    .platform-switcher-chevron {
+      width: 12px;
+      height: 12px;
+      transition: transform var(--transition-base);
+    }
+    .platform-switcher-trigger[aria-expanded="true"] .platform-switcher-chevron {
+      transform: rotate(180deg);
+    }
+    .platform-switcher-menu {
+      position: absolute;
+      top: calc(64px - var(--space-1));
+      left: var(--space-3);
+      right: var(--space-3);
+      z-index: 60;
+      background: var(--color-white);
+      border: 1px solid var(--color-gray-200);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      padding: var(--space-2);
+    }
+    .platform-switcher-menu[hidden] { display: none; }
+    .platform-switcher-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--color-gray-500);
+      padding: var(--space-2) var(--space-3) var(--space-1);
+    }
+    .platform-option {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-2) var(--space-3);
+      border-radius: var(--radius-md);
+      border-left: 3px solid transparent;
+      text-decoration: none;
+      transition: background var(--transition-base);
+    }
+    .platform-option:hover { background: var(--color-gray-100); }
+    .platform-option.is-current,
+    .platform-option[aria-current="page"] {
+      background: var(--color-gray-50);
+      border-left-color: var(--color-gold);
+    }
+    .platform-monogram {
+      width: 28px;
+      height: 28px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-md);
+      background: var(--color-surface-navy);
+      color: var(--color-white);
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .platform-option-text { min-width: 0; display: flex; flex-direction: column; }
+    .platform-option-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-gray-900);
+      line-height: 1.3;
+    }
+    .platform-option-desc {
+      font-size: 13px;
+      color: var(--color-gray-500);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .platform-option-check {
+      width: 16px;
+      height: 16px;
+      margin-left: auto;
+      flex-shrink: 0;
+      color: var(--color-gold);
+    }
+
     /* --- Main Area --- */
     .main-area {
       margin-left: var(--sidebar-width);
@@ -1900,16 +2002,47 @@
           <div class="section-overline">Patterns</div>
           <h1 class="section-title">App Shell and Navigation</h1>
           <p class="section-description">
-            The standard OTM tool is sidebar-first. The sidebar stacks a logo with product subtitle, a nav with collapsible groups, and a pinned user/account block with Sign out. These are the elements most often missed when a tool is rebuilt, so they are shown here in full. The complete, reusable implementation ships in <code class="code-inline">otm-components.css</code>.
+            The standard OTM tool is sidebar-first. The sidebar stacks a logo with product subtitle, a nav with collapsible groups, and a pinned user/account block with Sign out. These are the elements most often missed when a tool is rebuilt, so they are shown here in full. The complete, reusable implementation ships in <code class="code-inline">otm-components.css</code>. On OTM platforms (Venn, CaaS, Mill) the logo block doubles as the <strong>Platform Switcher</strong> (§5.10). Click <code class="code-inline">.OTM / Venn</code> below to switch apps.
           </p>
 
           <div style="display: flex; max-width: 280px; border: 1px solid var(--color-gray-200); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-md);">
             <aside style="width: 280px; background: var(--color-surface-navy); color: #fff; display: flex; flex-direction: column;">
 
-              <!-- Logo + product subtitle -->
-              <div style="padding: var(--space-4) var(--space-5); border-bottom: 1px solid var(--color-border-dark);">
-                <div style="font-size: 18px; font-weight: 700; letter-spacing: -0.02em;"><span style="color: var(--color-gold);">.</span>OTM</div>
-                <div style="font-size: 12px; color: var(--color-text-dark-muted); margin-top: 2px;">Venn Intelligence</div>
+              <!-- Logo + product subtitle = Platform Switcher trigger (§5.10). Click it. -->
+              <div class="platform-switcher">
+                <button type="button" class="platform-switcher-trigger" aria-haspopup="menu" aria-expanded="false" aria-controls="demo-platform-menu" style="flex-direction: column; align-items: flex-start; justify-content: center; color: #fff;">
+                  <span style="font-size: 18px; font-weight: 700; letter-spacing: -0.02em;"><span style="color: var(--color-gold);">.</span>OTM</span>
+                  <span class="sidebar-logo-sub" style="font-size: 12px; color: var(--color-text-dark-muted); margin-top: 2px;">
+                    Venn
+                    <svg class="platform-switcher-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                  </span>
+                </button>
+
+                <div class="platform-switcher-menu" id="demo-platform-menu" role="menu" hidden>
+                  <div class="platform-switcher-label">Switch platform</div>
+                  <a class="platform-option is-current" role="menuitem" aria-current="page" href="#shell">
+                    <span class="platform-monogram" aria-hidden="true">V</span>
+                    <span class="platform-option-text">
+                      <span class="platform-option-name">Venn</span>
+                      <span class="platform-option-desc">Insights and Analysis</span>
+                    </span>
+                    <svg class="platform-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="Current platform"><polyline points="20 6 9 17 4 12"/></svg>
+                  </a>
+                  <a class="platform-option" role="menuitem" href="https://caas.otmoffice.com">
+                    <span class="platform-monogram" aria-hidden="true">C</span>
+                    <span class="platform-option-text">
+                      <span class="platform-option-name">CaaS</span>
+                      <span class="platform-option-desc">Client Context</span>
+                    </span>
+                  </a>
+                  <a class="platform-option" role="menuitem" href="https://mill.otmoffice.com">
+                    <span class="platform-monogram" aria-hidden="true">M</span>
+                    <span class="platform-option-text">
+                      <span class="platform-option-name">Mill</span>
+                      <span class="platform-option-desc">Work generation</span>
+                    </span>
+                  </a>
+                </div>
               </div>
 
               <!-- Nav -->
@@ -1963,5 +2096,25 @@
       </div>
     </div>
   </div>
+
+  <!-- Platform switcher behavior (§5.10): click to toggle, Esc / outside-click to close -->
+  <script>
+    document.querySelectorAll('.platform-switcher-trigger').forEach(function (trigger) {
+      var menu = document.getElementById(trigger.getAttribute('aria-controls'));
+      if (!menu) return;
+      function close() { menu.hidden = true; trigger.setAttribute('aria-expanded', 'false'); }
+      function open() { menu.hidden = false; trigger.setAttribute('aria-expanded', 'true'); }
+      trigger.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (menu.hidden) { open(); } else { close(); }
+      });
+      document.addEventListener('click', function (e) {
+        if (!menu.hidden && !menu.contains(e.target) && !trigger.contains(e.target)) close();
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && !menu.hidden) { close(); trigger.focus(); }
+      });
+    });
+  </script>
 </body>
 </html>

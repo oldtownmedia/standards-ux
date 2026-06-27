@@ -531,6 +531,91 @@ Use sparingly: at most one attention metric per metric row, reserved for genuine
 
 **Metric grid layout:** Use CSS grid with `repeat(auto-fill, minmax(180px, 1fr))` and 16px gap.
 
+### 5.10 Platform Switcher (cross-app navigation)
+
+OTM runs as **separate apps on separate URLs** (Venn, CaaS, Mill), each with its own sidebar shell. The Platform Switcher lets the team move between them without retyping URLs. Because every OTM tool authenticates through the same Google Workspace OAuth (§8.5), a signed-in user is already authenticated in every platform, so switching is a single click.
+
+**Anchor: the sidebar logo block.** The `.OTM` + product-subtitle block (§5.5) already names the current product, so it doubles as the switcher trigger. Do not add a separate "Platforms" nav section or a header waffle; keep cross-app switching on the identity block where users expect it.
+
+**Trigger.** Render the logo block as a `<button>` (`.sidebar-logo .platform-switcher-trigger`) with `aria-haspopup="menu"` and `aria-expanded`. Add a 12px chevron after the subtitle that rotates 180deg when open. The `.OTM` mark and the subtitle are unchanged; the subtitle is still the *current* app's own name from its config (§5.5), never derived from the registry.
+
+**Popover.** A white card (`--radius-lg`, `--shadow-lg`) anchored below the logo, padded `--space-2`, `role="menu"`. It contains an overline label ("Switch platform") and one `role="menuitem"` row per platform:
+
+- a 28px navy **monogram tile** (single white letter: V / C / M),
+- the **product name** (Body, weight 600) over a **one-line descriptor** (Body Small, muted).
+- The **current** platform is a non-navigating row marked `aria-current="page"`, with a gold 3px left border and a gold check at the right (matching the active `.nav-item`). Every other row is an `<a href>` link to that app's URL.
+
+**Shared registry (the important part).** All apps render the switcher from **one shared manifest**, not three hardcoded lists, so the menu is identical everywhere and adding a fourth platform is a one-line change. Each app marks itself current by matching its own `PLATFORM_ID` against the registry.
+
+```js
+// otm-platforms.js — shared across every OTM app
+export const OTM_PLATFORMS = [
+  { id: 'venn', name: 'Venn', desc: 'Insights and Analysis', url: 'https://venn.otmoffice.com' },
+  { id: 'caas', name: 'CaaS', desc: 'Client Context',        url: 'https://caas.otmoffice.com' },
+  { id: 'mill', name: 'Mill', desc: 'Work generation',       url: 'https://mill.otmoffice.com' },
+];
+// The current app sets PLATFORM_ID (e.g. 'venn') and renders the matching row as
+// aria-current="page" (no href); every other row links out to its url.
+```
+
+**Behavior and a11y.**
+
+- Open/close on click; close on `Esc`, on outside click, and on selecting a row.
+- The menu is `hidden` when closed; the trigger reflects state via `aria-expanded`.
+- Keyboard: the trigger is focusable; Up/Down move between rows, `Enter` activates, `Esc` returns focus to the trigger.
+- Link out to each app's **root** for now; deep-link to the equivalent context later if it is cheap. The current platform's row never navigates.
+
+Markup (canonical classes ship in `otm-components.css`):
+
+```html
+<div class="platform-switcher">
+  <button type="button" class="sidebar-logo platform-switcher-trigger"
+          aria-haspopup="menu" aria-expanded="false" aria-controls="platform-menu">
+    <span class="sidebar-logo-mark"><span class="dot">.</span>OTM</span>
+    <span class="sidebar-logo-sub">
+      Venn
+      <svg class="platform-switcher-chevron" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2" stroke-linecap="round"
+           stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </span>
+  </button>
+
+  <div class="platform-switcher-menu" id="platform-menu" role="menu" hidden>
+    <div class="platform-switcher-label">Switch platform</div>
+
+    <!-- Current platform: marked, non-navigating -->
+    <a class="platform-option is-current" role="menuitem" aria-current="page"
+       href="https://venn.otmoffice.com">
+      <span class="platform-monogram" aria-hidden="true">V</span>
+      <span class="platform-option-text">
+        <span class="platform-option-name">Venn</span>
+        <span class="platform-option-desc">Insights and Analysis</span>
+      </span>
+      <svg class="platform-option-check" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2" stroke-linecap="round"
+           stroke-linejoin="round" aria-label="Current platform">
+        <polyline points="20 6 9 17 4 12"/></svg>
+    </a>
+
+    <a class="platform-option" role="menuitem" href="https://caas.otmoffice.com">
+      <span class="platform-monogram" aria-hidden="true">C</span>
+      <span class="platform-option-text">
+        <span class="platform-option-name">CaaS</span>
+        <span class="platform-option-desc">Client Context</span>
+      </span>
+    </a>
+
+    <a class="platform-option" role="menuitem" href="https://mill.otmoffice.com">
+      <span class="platform-monogram" aria-hidden="true">M</span>
+      <span class="platform-option-text">
+        <span class="platform-option-name">Mill</span>
+        <span class="platform-option-desc">Work generation</span>
+      </span>
+    </a>
+  </div>
+</div>
+```
+
 ---
 
 ## 6. CSS Variables Reference
@@ -751,7 +836,7 @@ Every app should expose `GET /health` returning:
 
 A standard multi-page tool includes:
 
-1. **Left sidebar** (navy, 240px) containing, top to bottom: the `.OTM` logo + product subtitle, the nav (with section labels and collapsible groups), and the pinned **user/account block with Sign out** (see §5.5). This is the primary navigation.
+1. **Left sidebar** (navy, 240px) containing, top to bottom: the `.OTM` logo + product subtitle, the nav (with section labels and collapsible groups), and the pinned **user/account block with Sign out** (see §5.5). This is the primary navigation. When the tool is one of the OTM platforms (Venn, CaaS, Mill), the logo block also acts as the **Platform Switcher** for moving between apps (see §5.10).
 2. **Content header bar** (56px, white) at the top of the content column showing the current page title / breadcrumb and any page-level actions.
 3. **Main content area** (gray-50 background, max-width 1280px).
 4. **Footer** (minimal: "OTM Internal Tools · 1.0.0").
@@ -1070,6 +1155,7 @@ These are the elements most often missed or done off-brand when tools are rebuil
 3. **Logo + product subtitle** at the top of the sidebar (`.OTM` over the instance name, with the leading dot in gold). The subtitle is the app's real name, pulled from its config or asked for — never a hardcoded placeholder or an abbreviation like "VEN" (see §5.5).
 4. **Button colors** are blue/gold only. No teal buttons.
 5. **Footer string** reads "OTM Internal Tools · {version}".
+6. **Platform Switcher** is present on each OTM platform (Venn, CaaS, Mill): the logo block is a `<button>` that opens the popover, fed from the shared `OTM_PLATFORMS` registry, with the current app marked `aria-current="page"` (see §5.10).
 
 ---
 
